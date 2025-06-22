@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fake Transaction Detector</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #8caae4;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #f7f1f1;
+    }
+
+    form {
+      background: #dee6e3;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 25px 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 15px 0 5px;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #f2f4f8;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:read-only {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #0066cc;
+      color: white;
+      font-weight: bold;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #004c99;
+    }
+
+    .result {
+      margin: 20px auto;
+      padding: 15px;
+      max-width: 500px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .result.safe {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .result.fraud {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔐 Fake Transaction Detector</h2>
+
+<form onsubmit="detectFraud(); return false;">
+  <label for="accountDropdown">Select Account number:</label>
+  <select id="accountDropdown" required onchange="fillDetails()">
+    <option value="">-- Select --</option>
+  </select>
+
+  <label for="name">Name:</label>
+  <input type="text" id="name" readonly>
+
+  <label for="country">Country:</label>
+  <input type="text" id="country" readonly>
+
+  <label for="date">Date of Transaction</label>
+  <input type="date" id="date"  >
+
+  <label for="amount">Amount:</label>
+  <input type="number" id="amount" readonly>
+
+  <label for="trustScore">Device Trust Score (0–1):</label>
+  <input type="number" step="0.01" id="trustScore" readonly>
+
+  <button type="submit">Check Transaction</button>
+</form>
+
+<div class="result" id="result" style="display:none;"></div>
+
+<script>
+  const users = [
+  { account: 'ACC123456', name: 'Alice Sharma', score: 0.8, country: 'India', amount: 10000, date: '2025-06-01' },
+  { account: 'ACC234567', name: 'Ravi Kumar', score: 0.3, country: 'India', amount: 15000, date: '2025-06-02' },
+  { account: 'ACC345678', name: 'Neha Joshi', score: 0.5, country: 'India', amount: 5000, date: '2025-06-03' },
+  { account: 'ACC456789', name: 'Amit Verma', score: 0.9, country: 'India', amount: 20000, date: '2025-06-04' },
+  { account: 'ACC567890', name: 'Pooja Singh', score: 0.4, country: 'India', amount: 8000, date: '2025-06-05' },
+  { account: 'ACC984785', name: 'SaiNihitha', score: 0.1, country: 'USA', amount: 10000, date: '2025-06-05' }
+];
+
+  const dropdown = document.getElementById("accountDropdown");
+
+  users.forEach(user => {
+    const option = document.createElement("option");
+    option.value = user.account;
+    option.textContent = `${user.account}`;
+    dropdown.appendChild(option);
+  });
+
+  function fillDetails() {
+    const selected = dropdown.value;
+    const user = users.find(u => u.account === selected);
+    if (user) {
+      document.getElementById("name").value = user.name;
+      document.getElementById("country").value = user.country;
+      document.getElementById("amount").value = user.amount;
+      document.getElementById("trustScore").value = user.score;
+    }
+  }
+
+  function detectFraud() {
+  const trust = parseFloat(document.getElementById("trustScore").value);
+  const amount = parseFloat(document.getElementById("amount").value);
+  const resultBox = document.getElementById("result");
+
+  // Calculate fraud probability
+  const fraudProbability = Math.min(1, ((1 - trust) * (amount / 20000)));
+  const percent = (fraudProbability * 100).toFixed(1);
+
+  let isFraud = fraudProbability >= 0.5;
+  let message = isFraud
+    ? `⚠️ Potential Fraud Detected!`
+    : `✅ Transaction Looks Safe.`;
+
+  message += `\n\n📊 Probability of Fraud: ${percent}%`;
+  
+  message += `\nplse verify with your bank`;
+
+  resultBox.style.display = "block";
+  resultBox.className = `result ${isFraud ? "fraud" : "safe"}`
+  resultBox.innerText = message;
+}
+</script>
+
+</body>
+</html>
